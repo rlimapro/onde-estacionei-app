@@ -11,37 +11,37 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import io.github.rlimapro.ondeestacionei.ui.ParkingViewModel
+import io.github.rlimapro.ondeestacionei.ui.Screen
+import io.github.rlimapro.ondeestacionei.ui.screen.HistoryScreen
+import io.github.rlimapro.ondeestacionei.ui.screen.MainScreen
 import io.github.rlimapro.ondeestacionei.ui.theme.OndeEstacioneiTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             OndeEstacioneiTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                val navController = rememberNavController()
+                val viewModel: ParkingViewModel = viewModel()
+
+                NavHost(navController = navController, startDestination = Screen.Main.route) {
+                    composable(Screen.Main.route) {
+                        MainScreen(
+                            viewModel = viewModel,
+                            onNavigateToHistory = { navController.navigate(Screen.History.route) },
+                            onNavigateToMap = {  }
+                        )
+                    }
+                    composable(Screen.History.route) {
+                        HistoryScreen(viewModel = viewModel)
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    OndeEstacioneiTheme {
-        Greeting("Android")
     }
 }
