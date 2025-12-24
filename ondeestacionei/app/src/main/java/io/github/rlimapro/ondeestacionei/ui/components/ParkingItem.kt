@@ -1,5 +1,6 @@
 package io.github.rlimapro.ondeestacionei.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,7 +28,8 @@ import java.util.Locale
 @Composable
 fun ParkingItem(
     location: ParkingLocation,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
 ) {
     val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     val dateString = sdf.format(Date(location.timestamp))
@@ -35,7 +37,8 @@ fun ParkingItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .clickable { onEdit() },
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Row(
