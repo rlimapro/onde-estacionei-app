@@ -2,48 +2,55 @@ package io.github.rlimapro.ondeestacionei.ui.screen
 
 import android.Manifest
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.Priority
 import io.github.rlimapro.ondeestacionei.ui.ParkingViewModel
+import io.github.rlimapro.ondeestacionei.ui.components.LastParkingCard
+import io.github.rlimapro.ondeestacionei.ui.components.MainTopBar
+import io.github.rlimapro.ondeestacionei.ui.components.ParkingButton
+import io.github.rlimapro.ondeestacionei.ui.components.dialog.ParkingNoteDialog
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -60,159 +67,205 @@ fun MainScreen(
     var lastKnownLocation by remember { mutableStateOf<android.location.Location?>(null) }
 
     val context = LocalContext.current
-    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-    val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+    val fusedLocationClient = remember {
+        LocationServices.getFusedLocationProviderClient(context)
+    }
+    val locationPermissionState = rememberPermissionState(
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
+
+    fun checkLocationSettings() {
+        val locationRequest = LocationRequest.Builder(
+            Priority.PRIORITY_HIGH_ACCURACY, 1000
+        ).build()
+        val builder = LocationSettingsRequest.Builder()
+            .addLocationRequest(locationRequest)
+        val client = LocationServices.getSettingsClient(context)
+        val task = client.checkLocationSettings(builder.build())
+
+        task.addOnSuccessListener { viewModel.updateGpsStatus(true) }
+        task.addOnFailureListener { exception ->
+            viewModel.updateGpsStatus(false)
+            if (exception is ResolvableApiException) {
+                try {
+                    exception.startResolutionForResult(context as android.app.Activity, 1001)
+                } catch (sendEx: Exception) { /* Ignorar */ }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        checkLocationSettings()
+    }
 
     if (showDialog) {
-        AlertDialog(
-            onDismissRequest = {
+        ParkingNoteDialog(
+            note = tempNote,
+            onNoteChange = { tempNote = it },
+            showNotePref = showNotePref,
+            onTogglePreference = { viewModel.toggleNotePreference(!it) },
+            onConfirm = {
+                lastKnownLocation?.let { loc ->
+                    viewModel.addLocation(loc.latitude, loc.longitude, tempNote)
+                }
                 showDialog = false
                 tempNote = ""
             },
-            title = { Text("Adicionar Nota") },
-            text = {
-                Column {
-                    TextField(
-                        value = tempNote,
-                        onValueChange = { tempNote = it },
-                        placeholder = { Text("Ex: Vaga G42, 3º Andar") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = !showNotePref,
-                            onCheckedChange = { viewModel.toggleNotePreference(!it) }
-                        )
-                        Text("Não perguntar novamente", style = MaterialTheme.typography.bodySmall)
-                    }
+            onSkip = {
+                lastKnownLocation?.let { loc ->
+                    viewModel.addLocation(loc.latitude, loc.longitude, null)
                 }
+                showDialog = false
+                tempNote = ""
             },
-            confirmButton = {
-                TextButton(onClick = {
-                    lastKnownLocation?.let {
-                        viewModel.addLocation(it.latitude, it.longitude, tempNote)
-                    }
-                    showDialog = false
-                    tempNote = ""
-                }) { Text("Salvar") }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    lastKnownLocation?.let {
-                        viewModel.addLocation(it.latitude, it.longitude, null)
-                    }
-                    showDialog = false
-                    tempNote = ""
-                }) { Text("Pular") }
+            onDismiss = {
+                showDialog = false
+                tempNote = ""
             }
         )
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Onde Estacionei?") },
-                actions = {
-                    IconButton(onClick = onNavigateToHistory) {
-                        Icon(Icons.Default.History, contentDescription = "Histórico")
-                    }
-                }
-            )
-        }
+            MainTopBar(onNavigateToHistory = onNavigateToHistory)
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
         ) {
-            state.lastLocation?.let { lastLoc ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 32.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                    )
-                ) {
-                    Column(Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Último Estacionamento:",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-
-                        Text(
-                            text = lastLoc.address ?: "Localização Guardada",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-
-                        if (!lastLoc.note.isNullOrBlank()) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Surface(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = MaterialTheme.shapes.small
-                            ) {
-                                Text(
-                                    text = "Nota: ${lastLoc.note}",
-                                    modifier = Modifier.padding(vertical = 4.dp),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                                )
-                            }
-                        }
-
-                        Button(
-                            onClick = onNavigateToMap,
-                            modifier = Modifier.padding(top = 12.dp)
-                        ) {
-                            Text("Ver no Mapa / Rota")
-                        }
-                    }
-                }
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                drawCircle(
+                    color = Color(0xFF6650a4).copy(alpha = 0.05f),
+                    radius = size.width * 0.6f,
+                    center = Offset(size.width * 0.5f, -size.height * 0.2f)
+                )
+                drawCircle(
+                    color = Color(0xFF6650a4).copy(alpha = 0.03f),
+                    radius = size.width * 0.8f,
+                    center = Offset(-size.width * 0.3f, size.height * 0.8f)
+                )
             }
 
-            Button(
-                onClick = {
-                    if (locationPermissionState.status.isGranted) {
-                        getCurrentLocation(fusedLocationClient) { location ->
-                            if (showNotePref) {
-                                lastKnownLocation = location
-                                showDialog = true
-                            } else {
-                                viewModel.addLocation(location.latitude, location.longitude, null)
-                            }
-                        }
-                    } else {
-                        locationPermissionState.launchPermissionRequest()
-                    }
-                },
-                modifier = Modifier.size(200.dp),
-                shape = MaterialTheme.shapes.extraLarge
+            Column(
+                modifier = Modifier.fillMaxSize()
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        Icons.Default.LocationOn,
-                        contentDescription = null,
-                        modifier = Modifier.size(48.dp)
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    if (!state.isOnline) {
+                        StatusBanner(
+                            text = "Sem conexão com a internet",
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                    if (!state.isGpsEnabled) {
+                        StatusBanner(
+                            text = "GPS desativado. Toque para ativar.",
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                            onClick = { checkLocationSettings() }
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    AnimatedVisibility(
+                        visible = state.lastLocation != null,
+                        enter = fadeIn() + slideInVertically(),
+                        exit = fadeOut() + slideOutVertically()
+                    ) {
+                        state.lastLocation?.let { lastLoc ->
+                            LastParkingCard(
+                                location = lastLoc,
+                                onNavigateToMap = onNavigateToMap
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    ParkingButton(
+                        onClick = {
+                            handleParkingButtonClick(
+                                locationPermissionState = locationPermissionState,
+                                fusedLocationClient = fusedLocationClient,
+                                showNotePref = showNotePref,
+                                onLocationReceived = { location ->
+                                    lastKnownLocation = location
+                                    showDialog = true
+                                },
+                                onLocationReceivedNoDialog = { location ->
+                                    viewModel.addLocation(
+                                        location.latitude,
+                                        location.longitude,
+                                        null
+                                    )
+                                }
+                            )
+                        }
                     )
-                    Spacer(Modifier.height(8.dp))
-                    Text("ESTACIONEI!")
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
         }
     }
 }
 
+@Composable
+fun StatusBanner(
+    text: String,
+    containerColor: Color,
+    contentColor: Color,
+    onClick: (() -> Unit)? = null
+) {
+    Surface(
+        color = containerColor,
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(8.dp).fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.labelMedium,
+            color = contentColor
+        )
+    }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+private fun handleParkingButtonClick(
+    locationPermissionState: PermissionState,
+    fusedLocationClient: FusedLocationProviderClient,
+    showNotePref: Boolean,
+    onLocationReceived: (android.location.Location) -> Unit,
+    onLocationReceivedNoDialog: (android.location.Location) -> Unit
+) {
+    if (locationPermissionState.status.isGranted) {
+        getCurrentLocation(fusedLocationClient) { location ->
+            if (showNotePref) {
+                onLocationReceived(location)
+            } else {
+                onLocationReceivedNoDialog(location)
+            }
+        }
+    } else {
+        locationPermissionState.launchPermissionRequest()
+    }
+}
+
 @SuppressLint("MissingPermission")
 private fun getCurrentLocation(
-    fusedLocationClient: com.google.android.gms.location.FusedLocationProviderClient,
+    fusedLocationClient: FusedLocationProviderClient,
     onLocationReceived: (android.location.Location) -> Unit
 ) {
     fusedLocationClient.lastLocation.addOnSuccessListener { location ->

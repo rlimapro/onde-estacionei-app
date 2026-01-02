@@ -10,6 +10,7 @@ import io.github.rlimapro.ondeestacionei.data.SettingsManager
 import io.github.rlimapro.ondeestacionei.data.repository.ParkingRepository
 import io.github.rlimapro.ondeestacionei.model.ParkingLocation
 import io.github.rlimapro.ondeestacionei.network.config.RetrofitConfig
+import io.github.rlimapro.ondeestacionei.network.NetworkMonitor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +21,7 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 class ParkingViewModel(application: Application) : AndroidViewModel(application) {
-
+    private val networkMonitor = NetworkMonitor(application)
     private val repository: ParkingRepository
     private val settingsManager = SettingsManager(application)
 
@@ -36,6 +37,12 @@ class ParkingViewModel(application: Application) : AndroidViewModel(application)
         val dao = AppDatabase.getDatabase(application).parkingDao()
         repository = ParkingRepository(dao, RetrofitConfig.orsApiService)
         observeLocations()
+
+        viewModelScope.launch {
+            networkMonitor.isOnline.collect { online ->
+                _uiState.update { it.copy(isOnline = online) }
+            }
+        }
     }
 
     private fun observeLocations() {
@@ -113,11 +120,11 @@ class ParkingViewModel(application: Application) : AndroidViewModel(application)
         _uiState.update { it.copy(currentMode = mode) }
     }
 
-    fun clearErrorMessage() {
-        _uiState.update { it.copy(errorMessage = null) }
-    }
-
     fun toggleNotePreference(enabled: Boolean) {
         viewModelScope.launch { settingsManager.setShowNoteDialog(enabled) }
+    }
+
+    fun updateGpsStatus(enabled: Boolean) {
+        _uiState.update { it.copy(isGpsEnabled = enabled) }
     }
 }
