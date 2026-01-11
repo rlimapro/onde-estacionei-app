@@ -10,8 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.Dot
-import com.google.android.gms.maps.model.Gap
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -67,11 +65,7 @@ fun MapContent(
                     points = state.routePoints,
                     color = MaterialTheme.colorScheme.primary,
                     width = 14f,
-                    geodesic = true,
-                    pattern = listOf(
-                        Dot(),
-                        Gap(10f)
-                    )
+                    geodesic = true
                 )
             }
         }
