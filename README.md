@@ -21,19 +21,21 @@ O objetivo do "Onde Estacionei?" é ser um assistente de estacionamento minimali
 
 ## Funcionalidades Principais
 
-- [ ] **Salvar Localização com Um Toque:** Permitir que o usuário salve sua localização GPS atual com um único botão na tela principal.
+- [x] **Salvar Localização com Um Toque:** Salva a localização GPS atual com um único botão na tela principal.
+
+- [x] **Visualização em Mapa Interativo:** Exibe a localização do carro e a posição atual do usuário utilizando a API do Google Maps.
       
-- [ ] **Visualização em Mapa Interativo:** Exibir a localização do carro (com um marcador distinto) e a posição atual do usuário em um mapa, utilizando a API do Google Maps.
-
-- [ ] **Navegação a Pé:** Traçar e exibir a rota de caminhada desde a posição atual do usuário até o local onde o carro foi estacionado.
-
-- [ ] **Endereço por Geocodificação Reversa:** Utilizar uma API de Geocodificação Reversa para converter as coordenadas GPS salvas em um endereço de rua aproximado e legível.
-
-- [ ] **Adição de Notas e Detalhes:** Permitir ao usuário adicionar informações textuais extras ao local salvo para facilitar a memorização (ex: "3º subsolo, vaga G42").
-
-- [ ] **Histórico de Locais:** Manter um histórico das últimas localizações salvas, permitindo ao usuário visualizar e gerenciar esses registros.
-
-- [ ] **Suporte a Tema Escuro/Claro:** A interface do aplicativo se adaptará automaticamente ao tema (claro ou escuro) definido nas configurações do sistema Android, utilizando MaterialTheme.
+- [x] **Navegação a Pé/de Carro:** Traça e exibe a rota de caminhada em tempo real entre o usuário e o veículo.
+      
+- [x] **Endereço por Geocodificação Reversa:** Converte coordenadas GPS em endereços legíveis utilizando o Geocoder nativo.
+      
+- [x] **Adição de Notas e Detalhes:** Permite salvar informações extras (ex: andar, número da vaga) via diálogos.
+      
+- [x] **Histórico de Locais:** Gerenciamento completo (Listagem e Exclusão) dos registros salvos no banco de dados local.
+      
+- [x] **Suporte a Tema Escuro/Claro:** Interface adaptável utilizando Material 3 e MaterialTheme.
+      
+- [x] **App Widget (Bônus):** Widget para a tela inicial que permite salvar a localização rapidamente sem abrir o app.
 
 ---
 
@@ -41,18 +43,50 @@ O objetivo do "Onde Estacionei?" é ser um assistente de estacionamento minimali
 > Daqui em diante o README.md só deve ser preenchido no momento da entrega final.
 
 ##  Tecnologias: 
-Liste aqui as tecnologias e bibliotecas que foram utilizadas no projeto.
+
+O projeto foi desenvolvido seguindo a arquitetura **MVVM (Model-View-ViewModel)** e utiliza as seguintes tecnologias:
+
+* **Linguagem:** Kotlin (2.0.21)
+* **UI:** Jetpack Compose (com Material 3)
+* **Banco de Dados:** Room (Persistência local do histórico)
+* **Preferências:** DataStore (Configurações simples de UI)
+* **Rede:** Retrofit & OkHttp (Consumo da API do OpenRouteService para rotas)
+* **Mapas e Localização:** * Google Maps Compose (Integração de Mapas)
+    * Play Services Location (Fused Location Provider)
+    * OpenRouteService API (Cálculo de rotas)
+* **Gerenciamento de Permissões:** Accompanist Permissions
+* **Navegação:** Navigation Compose
+* **Tarefas em Segundo Plano:** WorkManager (Utilizado pelo Widget)
+* **Componentes Adicionais:** Glance (Criação do App Widget), Core Splashscreen.
 
 ---
 
 ## Instruções para Execução
-[Inclua instruções claras sobre como rodar o projeto localmente. Isso é crucial para que você possa testá-lo nas próximas entregas. **Somente caso haja alguma coisa diferente do usual**
+
+Para rodar o projeto localmente, siga os passos abaixo:
+
+Clone o repositório:
 
 ```bash
-# Clone o repositório
-git clone [https://docs.github.com/pt/repositories/creating-and-managing-repositories/about-repositories](https://docs.github.com/pt/repositories/creating-and-managing-repositories/about-repositories)
+git clone git@github.com:profBruno-UFC-Qx/classroom-mobile-final-onde-estacionei.git
+```
 
-# Navegue para o diretório
-cd [nome-do-repositorio]
+Navegue para o diretório:
 
-# Siga as instruções específicas para a sua tecnologia...
+```bash
+cd classroom-mobile-final-onde-estacionei/ondeestacionei/
+```
+Abra no android studio via atalho ou usando:
+
+```bash
+studio .
+```
+
+Configuração das Chaves de API: Por questões de segurança e para evitar que as chaves sejam revogadas automaticamente pelos provedores (Google/ORS) ao serem detectadas em repositórios públicos, as chaves de API serão fornecidas no dia da apresentação.
+
+Ao obter as chaves, localize o arquivo `local.properties` e adicione as chaves do Google Maps e do OpenRouteService ao final do arquivo:
+
+```.properties
+MAPS_API_KEY=CHAVE
+ORS_API_KEY=CHAVE
+```
