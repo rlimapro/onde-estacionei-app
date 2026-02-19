@@ -1,92 +1,130 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/AR7CADm8)
-[![Open in Codespaces](https://classroom.github.com/assets/launch-codespace-2972f46106e565e64193e422d61a12cf1da4916b45550586e14ef0a7c637dd04.svg)](https://classroom.github.com/open-in-codespaces?assignment_repo_id=20982190)
-# Proposta de aplicativo
+<p align="center">
+  <img src="https://i.ibb.co/C5M86XqF/logo.png" width="120" alt="Onde Estacionei Logo" />
+</p>
 
-## Equipe
-* **Nome do Aluno:** José Rian Mendes Lima - 552303
+<h1 align="center">Onde Estacionei?</h1>
 
----
+<p align="center">
+  Nunca mais perca seu carro. Salve, visualize e navegue até seu veículo com um único toque.
+</p>
 
-## Título do Projeto
-Onde Estacionei?
-
----
-
-## Descrição do Projeto
-Quem nunca passou minutos preciosos procurando o carro em um estacionamento gigante de shopping, em uma rua desconhecida ou no meio da multidão de um grande evento? Aquele momento de incerteza pode ser frustrante e consumir um tempo valioso. O "Onde Estacionei?" é um aplicativo que surge para resolver exatamente esse problema de forma simples e eficiente. 
-
-O objetivo do "Onde Estacionei?" é ser um assistente de estacionamento minimalista e confiável. Com apenas um toque, o usuário pode salvar a localização exata do seu veículo. Ao retornar, o aplicativo exibe a posição do carro e a localização atual do usuário em um mapa interativo, traçando a melhor rota a pé para o reencontro. O público-alvo são todos os motoristas que frequentam grandes centros urbanos, shoppings, aeroportos e eventos, onde encontrar o carro pode se tornar um desafio.
-
----
-
-## Funcionalidades Principais
-
-- [x] **Salvar Localização com Um Toque:** Salva a localização GPS atual com um único botão na tela principal.
-
-- [x] **Visualização em Mapa Interativo:** Exibe a localização do carro e a posição atual do usuário utilizando a API do Google Maps.
-      
-- [x] **Navegação a Pé/de Carro:** Traça e exibe a rota de caminhada em tempo real entre o usuário e o veículo.
-      
-- [x] **Endereço por Geocodificação Reversa:** Converte coordenadas GPS em endereços legíveis utilizando o Geocoder nativo.
-      
-- [x] **Adição de Notas e Detalhes:** Permite salvar informações extras (ex: andar, número da vaga) via diálogos.
-      
-- [x] **Histórico de Locais:** Gerenciamento completo (Listagem e Exclusão) dos registros salvos no banco de dados local.
-      
-- [x] **Suporte a Tema Escuro/Claro:** Interface adaptável utilizando Material 3 e MaterialTheme.
-      
-- [x] **App Widget (Bônus):** Widget para a tela inicial que permite salvar a localização rapidamente sem abrir o app.
+<p align="center">
+  <img src="https://img.shields.io/badge/Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="Kotlin" />
+  <img src="https://img.shields.io/badge/Android-3DDC84?style=flat-square&logo=android&logoColor=white" alt="Android" />
+  <img src="https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose" />
+  <img src="https://img.shields.io/badge/Material%203-757575?style=flat-square&logo=material-design&logoColor=white" alt="Material 3" />
+  <img src="https://img.shields.io/badge/Room-FF6F00?style=flat-square&logo=sqlite&logoColor=white" alt="Room" />
+  <img src="https://img.shields.io/badge/DataStore-4285F4?style=flat-square&logo=google&logoColor=white" alt="DataStore" />
+  <img src="https://img.shields.io/badge/Retrofit-48B983?style=flat-square&logo=square&logoColor=white" alt="Retrofit" />
+  <img src="https://img.shields.io/badge/OkHttp-3E4348?style=flat-square&logo=square&logoColor=white" alt="OkHttp" />
+  <img src="https://img.shields.io/badge/Google%20Maps-4285F4?style=flat-square&logo=googlemaps&logoColor=white" alt="Google Maps" />
+  <img src="https://img.shields.io/badge/OpenRouteService-6DB33F?style=flat-square&logo=openstreetmap&logoColor=white" alt="OpenRouteService" />
+  <img src="https://img.shields.io/badge/WorkManager-FF6F00?style=flat-square&logo=google&logoColor=white" alt="WorkManager" />
+  <img src="https://img.shields.io/badge/Glance%20Widget-3DDC84?style=flat-square&logo=android&logoColor=white" alt="Glance" />
+</p>
 
 ---
 
-> [!WARNING]
-> Daqui em diante o README.md só deve ser preenchido no momento da entrega final.
+## 📖 Sobre o Projeto
 
-##  Tecnologias: 
+Quem nunca passou minutos preciosos procurando o carro em um estacionamento de shopping, em uma rua desconhecida ou no meio da multidão de um grande evento? Esse momento de incerteza pode ser frustrante e consumir um tempo valioso.
 
-O projeto foi desenvolvido seguindo a arquitetura **MVVM (Model-View-ViewModel)** e utiliza as seguintes tecnologias:
+**Onde Estacionei?** é um assistente de estacionamento minimalista e confiável. Com apenas um toque, o usuário salva a localização exata do veículo. Ao retornar, o aplicativo exibe a posição do carro e a localização atual do usuário em um mapa interativo, traçando a melhor rota para o reencontro.
 
-* **Linguagem:** Kotlin (2.0.21)
-* **UI:** Jetpack Compose (com Material 3)
-* **Banco de Dados:** Room (Persistência local do histórico)
-* **Preferências:** DataStore (Configurações simples de UI)
-* **Rede:** Retrofit & OkHttp (Consumo da API do OpenRouteService para rotas)
-* **Mapas e Localização:** * Google Maps Compose (Integração de Mapas)
-    * Play Services Location (Fused Location Provider)
-    * OpenRouteService API (Cálculo de rotas)
-* **Gerenciamento de Permissões:** Accompanist Permissions
-* **Navegação:** Navigation Compose
-* **Tarefas em Segundo Plano:** WorkManager (Utilizado pelo Widget)
-* **Componentes Adicionais:** Glance (Criação do App Widget), Core Splashscreen.
+**Público-alvo:** motoristas que frequentam grandes centros urbanos, shoppings, aeroportos e eventos — onde encontrar o carro pode se tornar um desafio real.
 
 ---
 
-## Instruções para Execução
+## ✨ Funcionalidades
 
-Para rodar o projeto localmente, siga os passos abaixo:
+- [x] **Salvar localização com um toque** — Registra a posição GPS atual diretamente pela tela principal
+- [x] **Mapa interativo** — Exibe a localização do carro e do usuário via Google Maps
+- [x] **Navegação a pé / de carro** — Traça a rota em tempo real entre o usuário e o veículo
+- [x] **Geocodificação reversa** — Converte coordenadas GPS em endereços legíveis
+- [x] **Notas e detalhes** — Permite salvar informações extras como andar e número da vaga
+- [x] **Histórico de locais** — Listagem e exclusão de registros salvos localmente
+- [x] **Tema escuro / claro** — Interface adaptável com Material 3
+- [x] **App Widget** — Salve sua localização diretamente pela tela inicial, sem abrir o app
 
-Clone o repositório:
+---
 
+## 🖼️ Screenshots
+
+> As imagens abaixo ilustram as principais telas da aplicação.
+
+| Tela Principal - Light Model | Tela Principal - Dark Model |
+|:-:|:-:|
+| ![Home](screenshots/home-light.png) | ![Map](screenshots/home-dark.png) |
+
+| Tela de Rota - Light Model | Tela de Rota - Dark Model |
+|:-:|:-:|
+| ![Home](screenshots/route-light.png) | ![Map](screenshots/route-dark.png) |
+
+| Tela de Histórico | Adicionar nota |
+|:-:|:-:|
+| ![Home](screenshots/history.png) | ![Map](screenshots/note-dialog.png) |
+---
+
+## 🏗️ Arquitetura
+
+O projeto segue a arquitetura **MVVM (Model-View-ViewModel)** e é construído com o ecossistema moderno do Android.
+
+| Camada | Tecnologia |
+|---|---|
+| **Linguagem** | Kotlin 2.0.21 |
+| **UI** | Jetpack Compose + Material 3 |
+| **Banco de dados** | Room |
+| **Preferências** | DataStore |
+| **Rede** | Retrofit + OkHttp |
+| **Mapas** | Google Maps Compose |
+| **Localização** | Play Services Location (Fused Location Provider) |
+| **Rotas** | OpenRouteService API |
+| **Permissões** | Accompanist Permissions |
+| **Navegação** | Navigation Compose |
+| **Background** | WorkManager |
+| **Widget** | Glance |
+| **Splash** | Core Splashscreen |
+
+---
+
+## 🚀 Como Executar
+
+### Pré-requisitos
+
+- Android Studio instalado
+- Chaves de API do **Google Maps** e **OpenRouteService**
+
+### 1. Clone o repositório
 ```bash
 git clone git@github.com:profBruno-UFC-Qx/classroom-mobile-final-onde-estacionei.git
 ```
 
-Navegue para o diretório:
-
+### 2. Acesse o diretório do projeto
 ```bash
 cd classroom-mobile-final-onde-estacionei/ondeestacionei/
 ```
-Abra no android studio via atalho ou usando:
 
+### 3. Abra no Android Studio
 ```bash
 studio .
 ```
 
-Configuração das Chaves de API: Por questões de segurança e para evitar que as chaves sejam revogadas automaticamente pelos provedores (Google/ORS) ao serem detectadas em repositórios públicos, as chaves de API serão fornecidas no dia da apresentação.
+### 4. Configure as chaves de API
 
-Ao obter as chaves, localize o arquivo `local.properties` e adicione as chaves do Google Maps e do OpenRouteService ao final do arquivo:
+Por segurança, as chaves de API não estão incluídas no repositório — provedores como Google e OpenRouteService revogam chaves detectadas em repositórios públicos automaticamente.
 
-```.properties
-MAPS_API_KEY=CHAVE
-ORS_API_KEY=CHAVE
+Após obter suas chaves, localize o arquivo `local.properties` na raiz do projeto e adicione ao final:
+```properties
+MAPS_API_KEY=SUA_CHAVE_AQUI
+ORS_API_KEY=SUA_CHAVE_AQUI
 ```
+
+### 5. Execute o app
+
+Conecte um dispositivo ou inicie um emulador e pressione **Run** no Android Studio.
+
+---
+
+## 📄 Licença
+
+Este projeto foi desenvolvido para fins acadêmicos.
